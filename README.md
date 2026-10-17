@@ -14,11 +14,11 @@ Dibangun dengan **Kotlin Multiplatform + Compose Multiplatform** sebagai Project
 
 | Nama | NIM | Role | GitHub |
 |---|---|---|---|
-| Refin Agus Saputra | 124140126 | Lead / Product & Integration | `@username-refin` |
+| Refin Agus Saputra | 124140126 | Lead / Product & Integration | [@Avnzgs864](https://github.com/Avnzgs864) |
 | Hania Syakira | 124140114 | Dev — UI/UX & Screens | [@HaniaSyakira-jpg](https://github.com/HaniaSyakira-jpg) |
 | Yowen Daniel | 124140120 | Dev — Architecture, Data, CI/CD | [@wennn99](https://github.com/wennn99) |
 
-> Catatan: username GitHub Refin masih perlu dilengkapi. Dosen pengampu ditambahkan sebagai collaborator repositori untuk keperluan review.
+> Dosen pengampu ditambahkan sebagai collaborator repositori untuk keperluan review.
 
 ---
 
