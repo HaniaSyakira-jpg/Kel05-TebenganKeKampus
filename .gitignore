@@ -1,0 +1,25 @@
+# Gradle
+.gradle/
+build/
+**/build/
+
+# Kotlin
+.kotlin/
+
+# IDE
+.idea/
+*.iml
+*.hprof
+
+# Local configuration (never commit machine-specific paths / secrets)
+local.properties
+*.keystore
+*.jks
+secrets.properties
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
