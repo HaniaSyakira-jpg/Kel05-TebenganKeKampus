@@ -1,202 +1,152 @@
 # Arsitektur — Tebengan Ke Kampus
 
-Dokumen ini menjelaskan desain arsitektur aplikasi: lapisan Clean Architecture, alur data, dependency injection, mekanisme `expect/actual`, strategi pengujian, serta keputusan teknis beserta alasannya.
+Dokumen ini menjelaskan bagaimana kode proyek ini disusun dan kenapa kami memilih cara itu. Bagian terakhir berisi hal-hal yang kami sadari belum ideal.
 
----
+## 1. Gambaran umum
 
-## 1. Prinsip Umum
-
-Aplikasi menerapkan **MVVM** di atas **Clean Architecture** dengan **Repository Pattern**.
-
-**Dependency Rule** — dependensi selalu mengarah ke dalam:
+Ada tiga layer, dan arah dependensinya selalu ke dalam:
 
 ```
-presentation ──► domain ◄── data
+presentation  ──▶  domain  ◀──  data
+    (UI)          (aturan)     (sumber data)
 ```
 
-- Lapisan **domain** tidak mengetahui apa pun tentang UI maupun sumber data. Ia hanya berisi model, kontrak repositori, dan use case.
-- Lapisan **data** mengimplementasikan kontrak domain.
-- Lapisan **presentation** bergantung pada use case (bukan langsung ke repositori/API).
+Artinya `domain` tidak tahu apa-apa soal Compose, Android, atau dari mana datanya berasal. `data` boleh bergantung pada `domain` karena dia mengimplementasikan interface yang didefinisikan di sana. `presentation` juga bergantung pada `domain` karena memanggil use case-nya.
 
-Manfaat: mudah diuji (domain & data dapat diuji tanpa UI), terpelihara, dan dapat berkembang (mis. menukar sumber data lokal menjadi REST API tanpa mengubah UI).
+Ini kelihatan seperti menambah kerumitan untuk aplikasi yang masih kecil. Alasannya baru terasa saat Sprint 3: begitu data pindah dari in-memory ke SQLDelight dan ditambah REST API, yang berubah hanya di layer `data`. ViewModel dan layar tidak perlu disentuh.
 
----
-
-## 2. Peta Lapisan
-
-### 2.1 Domain Layer (`domain/`)
-
-Inti bisnis aplikasi, murni Kotlin tanpa dependensi platform.
-
-| Berkas | Isi |
-|---|---|
-| `model/TitikLokasi.kt` | Titik koordinat + `jarakKmKe()` memakai **rumus Haversine** (fitur tema: Lokasi) |
-| `model/Tebengan.kt` | Model utama tawaran tumpangan + `StatusTebengan` (TERBUKA/PENUH/SELESAI) |
-| `model/Pengguna.kt` | Model profil pengguna |
-| `repository/TebenganRepository.kt` | Interface kontrak: `amatiDaftarTebengan`, `ambilTebengan`, `tambahTebengan`, `hapusTebengan` |
-| `usecase/TebenganUseCases.kt` | `AmatiDaftarTebenganUseCase`, `AmbilTebenganUseCase`, `TambahTebenganUseCase`, `HapusTebenganUseCase`, `CariTebenganTerdekatUseCase` |
-
-`CariTebenganTerdekatUseCase` adalah jantung fitur tema: ia mengambil daftar tebengan lalu mengurutkannya menaik berdasarkan `asal.jarakKmKe(titikSaya)`.
-
-### 2.2 Data Layer (`data/`)
-
-| Berkas | Peran |
-|---|---|
-| `local/TebenganLocalDataSource.kt` | Sumber data **in-memory** berbasis `MutableStateFlow`, berisi `SampleData` (4 tawaran contoh dengan koordinat di sekitar ITERA) |
-| `remote/HttpClientFactory.kt` | `expect fun createHttpClient()` + `BASE_URL` (kerangka Ktor, aktif Sprint 3) |
-| `repository/TebenganRepositoryImpl.kt` | Mengimplementasikan `TebenganRepository`, kini didelegasikan ke local data source |
-| `model/TebenganDto.kt` | DTO `@Serializable` + fungsi mapper `toDomain()` / `toDto()` |
-
-DTO dan domain model **dipisah** agar perubahan bentuk data dari API tidak merembet ke seluruh aplikasi; mapper menjaga batas antar-lapisan.
-
-> Sprint 3 akan menambahkan data source Ktor (remote) dan penyimpanan persisten (SQLDelight/DataStore), dengan `TebenganRepositoryImpl` menjadi titik orkestrasi offline-first.
-
-### 2.3 Presentation Layer (`presentation/`)
-
-| Direktori | Peran |
-|---|---|
-| `navigation/Routes.kt` + `AppNavHost.kt` | Definisi rute & `NavHost`, bottom navigation (Beranda/Peta/Profil), argument passing `detail/{id}` |
-| `theme/Theme.kt` | Skema warna Material 3 (terang & gelap) bernuansa hijau ITERA |
-| `components/` | Composable reusable: `TebenganCard`, `StateComponents` (loading/empty/error) |
-| `screens/` | 6 layar: `home`, `detail`, `tambah`, `peta`, `profil`, `pengaturan` |
-
-Setiap layar mengikuti pola **UDF (Unidirectional Data Flow)**:
+## 2. Struktur folder
 
 ```
-ViewModel.uiState: StateFlow<UiState>  ──collectAsState──►  Composable
-        ▲                                                        │
-        └──────────────── user event (callback) ─────────────────┘
+composeApp/src/
+├── commonMain/kotlin/id/ac/itera/tebengankekampus/
+│   ├── data/
+│   │   ├── local/            penyimpanan in-memory (nanti diganti SQLDelight)
+│   │   ├── mapper/           ubah DTO ⇄ model domain
+│   │   ├── remote/           placeholder untuk Ktor, belum dipakai
+│   │   └── repository/       implementasi TebenganRepository
+│   ├── domain/
+│   │   ├── model/            Tebengan, TitikLokasi
+│   │   ├── repository/       interface TebenganRepository
+│   │   └── usecase/          CariTebenganTerdekatUseCase, dll
+│   ├── presentation/
+│   │   ├── components/       TebenganCard, EmptyState, LoadingState
+│   │   ├── navigation/       AppNavHost, Routes
+│   │   ├── screens/          home, detail, tambah, peta, profil, pengaturan
+│   │   └── theme/            warna, tipografi, Material 3 theme
+│   ├── di/                   modul Koin
+│   ├── platform/             expect/actual untuk HttpClient dan info platform
+│   └── App.kt
+├── commonTest/               unit test
+├── androidMain/              MainActivity, Platform.android.kt, manifest
+├── iosMain/                  MainViewController, Platform.ios.kt
+└── desktopMain/              main.kt untuk jendela desktop
 ```
 
-Contoh `HomeViewModel`:
+## 3. Isi tiap layer
 
-```kotlin
-sealed interface HomeUiState {
-    data object Memuat : HomeUiState
-    data class Sukses(val daftar: List<Tebengan>) : HomeUiState
-    data object Kosong : HomeUiState
-    data class Galat(val pesan: String) : HomeUiState
-}
+### domain
 
-val uiState: StateFlow<HomeUiState> = amatiDaftarTebenganUseCase()
-    .map { if (it.isEmpty()) HomeUiState.Kosong else HomeUiState.Sukses(it) }
-    .catch { emit(HomeUiState.Galat(it.message ?: "Gagal memuat data")) }
-    .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Memuat)
+Bagian paling sederhana sekaligus paling penting, karena di sini aturan mainnya hidup.
+
+`TitikLokasi` menyimpan latitude dan longitude, plus fungsi `jarakKmKe()` yang menghitung jarak dengan rumus Haversine. Rumus ini dipilih karena cukup akurat untuk jarak antar titik di sekitar kampus dan tidak butuh library tambahan.
+
+`Tebengan` adalah model utama: id, nama pengemudi, kontak, titik jemput, tujuan, jadwal, jumlah kursi, harga, catatan, dan flag untuk tawaran milik sendiri.
+
+`TebenganRepository` cuma interface. Isinya operasi yang dibutuhkan UI dan tidak lebih — `getSemuaTebengan()`, `getTebenganById()`, `tambahTebengan()`, `hapusTebengan()`.
+
+`CariTebenganTerdekatUseCase` menerima daftar tebengan dan lokasi pengguna, lalu mengembalikan daftar yang sudah diurutkan berdasarkan jarak. Ini inti fitur tema Lokasi kami.
+
+### data
+
+`TebenganRepositoryImpl` mengimplementasikan interface di atas. Sekarang dia hanya membungkus `TebenganLocalDataSource`, yang menyimpan daftar di sebuah `MutableStateFlow` berisi data awal (seed) di memori.
+
+`TebenganMapper` mengubah `TebenganDto` ke model domain. Sebenarnya sekarang belum ada API, tapi DTO dan mapper tetap dibuat supaya saat Ktor masuk nanti tidak perlu mengubah bentuk data yang beredar di layer lain.
+
+`remote/HttpClientFactory` sudah ada sebagai `expect`/`actual`, tapi belum dipanggil dari mana pun.
+
+### presentation
+
+ViewModel menyimpan state dan mengeluarkan `StateFlow`. Layar Compose mengumpulkannya lewat `collectAsState()`. ViewModel tidak pernah menyimpan referensi ke composable, jadi bisa diuji tanpa Android.
+
+State UI dibuat sebagai sealed interface per layar — misalnya `HomeUiState.Loading`, `HomeUiState.Success`, `HomeUiState.Error`. Dengan begitu layar bisa melakukan `when` yang lengkap, dan compiler akan memberitahu kalau ada state yang belum ditangani.
+
+## 4. Alur data
+
+Contoh ketika pengguna membuka layar Peta:
+
+```
+PetaScreen
+  └─ collectAsState() ◀── PetaViewModel (StateFlow)
+                            └─ CariTebenganTerdekatUseCase
+                                 └─ TebenganRepository (interface)
+                                      └─ TebenganRepositoryImpl  [data]
+                                           └─ TebenganLocalDataSource
 ```
 
-ViewModel tidak mengetahui Compose; ia hanya menyediakan `StateFlow`. UI merender state secara ekshaustif dengan `when`.
+Yang perlu diperhatikan: view model bergantung pada interface, bukan implementasi. Pergantian sumber data tidak menyentuh layer atas.
 
----
+## 5. Dependency injection
 
-## 3. Dependency Injection (Koin)
+Kami memakai Koin, dan ini bonus untuk Sprint 1. Modulnya ada di `di/` sebagai beberapa deklarasi terpisah:
 
-Bonus Sprint 1 (+10%). Seluruh grafik dependensi didefinisikan pada satu modul: `di/AppModule.kt`.
+- `platformModule` — `HttpClient` dan info platform
+- `dataModule` — data source dan repository
+- `domainModule` — use case
+- `viewModelModule` — semua ViewModel
 
-```
-TebenganLocalDataSource ──► TebenganRepositoryImpl ──► UseCases ──► ViewModels
-        (single)                   (single)              (factory)     (viewModel)
-```
+Layer `presentation` memanggil `koinViewModel()` untuk mendapatkan ViewModel-nya. Tidak ada layar yang membuat objek data secara langsung.
 
-| Definisi | Scope | Alasan |
+Alasan memilih Koin dibanding Hilt: Koin berbasis Kotlin DSL dan tidak butuh pemrosesan anotasi, jadi pengaruhnya ke waktu build hampir tidak ada, dan dia jalan di semua target KMP termasuk iOS. Hilt hanya untuk Android, jadi tidak cocok untuk proyek ini.
+
+## 6. Kode yang berbeda per platform
+
+Beberapa hal tidak bisa ditulis sekali untuk semua target, jadi kami pakai `expect`/`actual`:
+
+| expect (commonMain) | Android | iOS | Desktop |
+|---|---|---|---|
+| `Platform` | `android.os.Build.VERSION.SDK_INT` | `UIDevice.currentDevice.systemVersion` | `System.getProperty("java.version")` |
+
+Ini terlihat sepele, tapi justru berguna: layar Pengaturan menampilkan versi platform lewat `Platform`, dan di screenshot Android muncul "Platform: Android (API 37)". Tanpa pola ini, setiap layar harus punya tipe sendiri per platform.
+
+iOS masih `expect/actual` saja belum diuji jalan, karena butuh Mac. Yang bisa kami pastikan sekarang hanya bahwa konfigurasinya benar dan proyeknya bisa di-build di CI.
+
+## 7. Testing
+
+Unit test ada di `commonTest` supaya jalan di semua target tanpa duplikasi. Yang diuji:
+
+| File | Isi | Jumlah |
 |---|---|---|
-| `TebenganLocalDataSource` | `single` | Satu sumber data dibagi seluruh aplikasi agar state konsisten |
-| `TebenganRepository` → `TebenganRepositoryImpl` | `single` | Stateless, aman dibagi |
-| Use case | `factory` | Ringan & tanpa state |
-| ViewModel | `viewModelOf { }` | Siklus hidup dikelola lifecycle, diambil di UI via `koinViewModel()` |
+| `TitikLokasiTest` | Perhitungan Haversine untuk jarak nol dan jarak yang diketahui | 2 |
+| `CariTebenganTerdekatUseCaseTest` | Hasil urutan sesuai jarak | 1 |
+| `TebenganRepositoryImplTest` | Ambil semua, ambil per id (ada dan tidak ada), tambah, hapus | 4 |
+| `TebenganMapperTest` | Perubahan DTO ke model domain | 3 |
 
-Inisialisasi Koin dilakukan **satu kali per platform**, di titik masuk masing-masing:
+Total 10 test case. Semuanya berjalan tanpa emulator atau perangkat.
 
-| Platform | Titik masuk | Berkas |
+Target desktop ditambahkan khusus untuk ini. Tujuannya supaya `:composeApp:desktopTest` bisa jalan cepat di komputer anggota tim dan di runner Linux, tanpa menunggu emulator menyala. Di CI, kami memakai kombinasi `testDebugUnitTest` dan `desktopTest`, dan tidak memakai task `test` biasa karena task itu akan ikut menarik task iOS yang tidak mungkin jalan di Linux.
+
+## 8. Keputusan teknis
+
+| Keputusan | Alasan | Yang dikorbankan |
 |---|---|---|
-| Android | `TebenganApplication.onCreate()` (via `androidContext`) | `androidMain/.../TebenganApplication.kt` |
-| Desktop | `main()` sebelum `application { }` | `desktopMain/.../main.kt` |
-| iOS | `MainViewController()` sebelum `ComposeUIViewController` | `iosMain/.../MainViewController.kt` |
+| Clean architecture 3 layer | Perubahan sumber data nanti tidak merembet ke UI | Lebih banyak file dan boilerplate |
+| Compose Multiplatform | Satu UI untuk Android, iOS, desktop | Belum semua API Compose Desktop sama matangnya |
+| Repository pattern | UI tidak tahu asal data; gampang di-mock saat test | Satu lapisan tambahan yang harus dilewati |
+| Koin | Ringan, tidak butuh anotasi, jalan di iOS | Kesalahan dependency baru ketahuan saat aplikasi jalan, bukan saat compile |
+| Haversine dihitung sendiri | Tidak menambah dependency, cukup akurat untuk skala kampus | Tidak memperhitungkan rute jalan yang sebenarnya |
+| Data in-memory dulu | Memungkinkan Sprint 1 fokus ke struktur dan CI | Data hilang saat aplikasi ditutup |
+| Unit test di `commonTest` | Satu set test untuk semua target | Tidak bisa menguji hal yang khusus platform |
+| `expect/actual` untuk platform | Satu cara akses info platform di semua target | Dua implementasi yang harus dijaga sinkron |
 
-UI bersama (`App()`) identik di ketiga platform.
+## 9. Yang belum beres
 
----
+Kami mencatat ini supaya tidak terlihat seperti proyek yang sudah sempurna:
 
-## 4. Multiplatform: `expect`/`actual`
-
-Logika bersama berada di `commonMain`; hal yang berbeda per platform dideklarasikan `expect` dan diimplementasikan di masing-masing `*Main`.
-
-| `expect` (commonMain) | `actual` |
-|---|---|
-| `fun platformName(): String` (`util/Platform.kt`) | Android / Desktop / iOS |
-| `fun createHttpClient(): HttpClient` (`data/remote/HttpClientFactory.kt`) | Android & Desktop → **OkHttp**; iOS → **Darwin** |
-
-Target yang dibangun:
-
-| Target | Keterangan |
-|---|---|
-| `androidTarget` | Wajib (minSdk 24, target/compileSdk 36) |
-| `jvm("desktop")` | Untuk preview cepat & menjalankan unit test di CI tanpa emulator |
-| `iosX64`, `iosArm64`, `iosSimulatorArm64` | Bonus iOS (+10%); otomatis di-skip bila host bukan macOS (`kotlin.native.ignoreDisabledTargets=true`) |
-
----
-
-## 5. Strategi Pengujian
-
-Unit test ditulis di `commonTest` sehingga dapat dijalankan baik di Desktop maupun Android.
-
-| Berkas uji | Cakupan |
-|---|---|
-| `domain/model/TitikLokasiTest.kt` | Perhitungan jarak Haversine |
-| `domain/usecase/CariTebenganTerdekatUseCaseTest.kt` | Urutan hasil pencarian berdasarkan jarak |
-| `data/repository/TebenganRepositoryImplTest.kt` | Perilaku CRUD repositori |
-| `data/model/TebenganMapperTest.kt` | Map DTO ↔ domain model |
-
-Menjalankan:
-
-```bash
-./gradlew :composeApp:desktopTest        # JVM — paling cepat
-./gradlew :composeApp:testDebugUnitTest  # Android
-```
-
-> Target Sprint 4: minimal 10 unit test + 3 UI test dengan coverage > 50%.
-
----
-
-## 6. Keputusan Teknis
-
-| Keputusan | Alasan |
-|---|---|
-| **Compose Multiplatform** untuk UI | Satu codebase UI untuk Android, iOS, dan Desktop |
-| **Desktop target ditambahkan** | Memungkinkan menjalankan unit test dan pratinjau aplikasi di CI/Linux tanpa emulator atau macOS |
-| **Version Catalog** (`libs.versions.toml`) | Versi dependensi terpusat & mudah diperbarui |
-| **StateFlow + sealed UI state** | State reaktif, rendering ekshaustif, mudah diuji |
-| **DTO dipisah dari domain model** | Batas lapisan yang jelas; API eksternal tidak membocorkan ke domain |
-| **Data source in-memory di Sprint 1** | Aplikasi langsung dapat didemokan sebelum backend/persistensi ada |
-| **Koin** | DI ringan, ramah multiplatform, sintaks DSL sederhana |
-| **Haversine di domain** | Logika fitur tema dapat diuji murni tanpa perangkat/GPS |
-
----
-
-## 7. Alur Data (contoh: membuka Beranda)
-
-```
-1. App() ──► AppNavHost ──► HomeScreen(koinViewModel())
-2. HomeViewModel dipanggil; ia menerima AmatiDaftarTebenganUseCase (Koin)
-3. UseCase ──► TebenganRepository (interface) ──► TebenganRepositoryImpl
-4. RepositoryImpl ──► TebenganLocalDataSource (MutableStateFlow) / Flow<List<Tebengan>>
-5. Flow dipetakan ke HomeUiState (Memuat → Sukses/Kosong/Galat)
-6. HomeScreen meng-collect uiState dan merender LazyColumn berisi TebenganCard
-```
-
-Saat pengguna mengetuk salah satu kartu:
-
-```
-onLihatDetail(id) ──► navController.navigate("detail/$id")
-   ──► DetailScreen membaca id dari entry.arguments ──► DetailViewModel memuat tebengan
-```
-
----
-
-## 8. Rencana Evolusi Arsitektur
-
-| Sprint | Perubahan arsitektur |
-|---|---|
-| 2 | Lengkapi ViewModel & form; pemetaan state CRUD; penanganan error/empty |
-| 3 | Tambah `RemoteDataSource` (Ktor) + `LocalDataSource` persisten (SQLDelight); `RepositoryImpl` menjadi orkestrator offline-first; data source lokasi platform (GPS + permission) |
-| 4 | Test double untuk repositori; UI test Compose; penyempurnaan theme & animasi |
-| 5 | Signing config, optimasi build & ukuran APK |
+1. **Ktor belum dipakai.** Dependency dan `HttpClientFactory` sudah ada, tapi belum ada pemanggilan. Ini sengaja supaya build config tidak berubah lagi di Sprint 3, tapi tetap saja ada dependency yang menganggur dua sprint.
+2. **Penyimpanan masih di memori.** Belum ada SQLDelight atau DataStore. Tawaran baru hilang begitu aplikasi ditutup. Perilakunya konsisten, tapi tetap menyesatkan kalau tidak diberi tahu saat demo.
+3. **Lokasi masih hardcoded.** Koordinat pengguna di `PetaViewModel` masih ditulis langsung di kode. Belum ada permission lokasi maupun mock GPS. Jadi pengurutan berdasarkan jarak sudah benar secara logika, tapi masukannya belum asli.
+4. **Peta masih placeholder.** Yang tampil masih kotak penanda, belum peta sungguhan. Komponen pemetaan belum dipilih karena akan menentukan dependency baru yang lumayan berat; kami tunda sampai Sprint 3.
+5. **Belum ada UI test.** Syarat 3 UI test belum terpenuhi. Ini memang tertulis di rencana Sprint 4.
+6. **iOS belum benar-benar dijalankan.** Konfigurasinya ada dan CI-nya hijau untuk tugas non-iOS, tapi kami belum pernah melihatnya jalan di simulator karena tidak punya Mac.
+7. **Coverage belum diukur.** Kami belum memasang tool untuk mengukur persentase coverage, jadi klaim "di atas 50%" belum bisa dibuktikan. Ini akan ditambahkan di Sprint 4.

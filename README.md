@@ -1,260 +1,173 @@
-# Tebengan Ke Kampus 🚗🎓
+# Tebengan Ke Kampus
 
 [![CI](https://github.com/HaniaSyakira-jpg/Kel05-TebenganKeKampus/actions/workflows/ci.yml/badge.svg)](https://github.com/HaniaSyakira-jpg/Kel05-TebenganKeKampus/actions/workflows/ci.yml)
 
-Aplikasi mobile multiplatform untuk **berbagi tumpangan (tebengan) menuju kampus ITERA**. Mahasiswa yang punya kendaraan dapat menawarkan sisa kursi, dan mahasiswa lain dapat mencari tumpangan terdekat dari titik jemputnya.
+Aplikasi mobile multiplatform untuk mencari dan menawarkan tumpangan (tebengan) menuju kampus ITERA. Dibuat dengan Kotlin Multiplatform + Compose Multiplatform untuk tugas akhir mata kuliah IF25-22017 Pengembangan Aplikasi Mobile.
 
-Dibangun dengan **Kotlin Multiplatform + Compose Multiplatform** sebagai Project Akhir mata kuliah **IF25-22017 Pengembangan Aplikasi Mobile**, Institut Teknologi Sumatera.
+Latar belakangnya sederhana. Banyak mahasiswa berangkat ke kampus dengan kursi kosong, sementara yang lain kesulitan cari tumpangan. Aplikasi ini mempertemukan keduanya, lalu mengurutkan tawaran berdasarkan jarak titik jemput ke posisi pencari. Bagian terakhir itu yang jadi fokus tema kelompok kami: **Lokasi**.
 
-> **Fitur tema: Lokasi** — pencarian tumpangan diurutkan berdasarkan jarak titik jemput ke lokasi pengguna (rumus Haversine).
+## Tim — Kelompok 05 PAM RA
 
----
-
-## 👥 Tim — Kelompok 05 PAM RA
-
-| Nama | NIM | Role | GitHub |
+| Nama | NIM | Peran | GitHub |
 |---|---|---|---|
-| Refin Agus Saputra | 124140126 | Lead / Product & Integration | [@Avnzgs864](https://github.com/Avnzgs864) |
-| Hania Syakira | 124140114 | Dev — UI/UX & Screens | [@HaniaSyakira-jpg](https://github.com/HaniaSyakira-jpg) |
-| Yowen Daniel | 124140120 | Dev — Architecture, Data, CI/CD | [@wennn99](https://github.com/wennn99) |
+| Refin Agus Saputra | 124140126 | Ketua, integrasi antar fitur, QA | [@Avnzgs864](https://github.com/Avnzgs864) |
+| Hania Syakira | 124140114 | UI/UX dan implementasi layar | [@HaniaSyakira-jpg](https://github.com/HaniaSyakira-jpg) |
+| Yowen Daniel | 124140120 | Arsitektur, data layer, CI/CD, testing | [@wennn99](https://github.com/wennn99) |
 
-> Dosen pengampu ditambahkan sebagai collaborator repositori untuk keperluan review.
+## Status pengerjaan
 
----
+Sprint 1 (minggu ke-11) sudah selesai. Yang saat ini sudah jalan:
 
-## 📱 Deskripsi
+- Struktur proyek KMP dengan pemisahan layer presentation / domain / data
+- 6 layar Compose: Beranda, Detail, Tambah, Peta, Profil, Pengaturan
+- Navigasi antar layar + bottom navigation, termasuk passing data lewat route `detail/{id}`
+- State management pakai `StateFlow` dan sealed interface untuk UI state
+- Dependency injection pakai Koin
+- 10 unit test (4 file) untuk perhitungan jarak, use case, repository, dan mapper
+- CI GitHub Actions: build + test otomatis tiap push/PR
 
-**Tebengan Ke Kampus** menyelesaikan masalah nyata mahasiswa ITERA: transportasi menuju kampus yang mahal dan tidak efisien. Aplikasi mempertemukan pengemudi (penawar tebengan) dengan penumpang berdasarkan **kedekatan lokasi titik jemput**.
+Yang belum selesai, sesuai rencana sprint berikutnya:
 
-Alur utama:
-1. Pengguna membuka **Beranda** dan melihat daftar tawaran tebengan.
-2. Daftar diurutkan dari titik jemput yang **paling dekat** dengan lokasi pengguna.
-3. Pengguna membuka **Detail** untuk melihat rute, jadwal, kuota kursi, dan ongkos.
-4. Pengguna dapat **menambah** tawaran tebengan miliknya sendiri lewat form.
-5. **Peta** menampilkan sebaran titik jemput; **Profil** dan **Pengaturan** melengkapi aplikasi.
+- **Ktor belum dipakai.** Dependency-nya sudah dimasukkan ke build config sejak Sprint 1, tapi belum ada kode yang memanggilnya. Kami sengaja menaruhnya sekarang supaya Sprint 3 tidak perlu ubah konfigurasi build lagi — risikonya, ada dependency yang menganggur selama dua sprint.
+- **Data masih disimpan di memori.** Kalau aplikasi ditutup, tebengan yang baru ditambahkan akan hilang. Ini bukan bug, tapi memang belum dikerjakan; penyimpanan permanen (SQLDelight) masuk Sprint 3.
+- **Peta belum pakai GPS.** Koordinat lokasi pengguna masih di-hardcode di `PetaViewModel`, dan penanda peta masih berupa kotak placeholder, belum peta sungguhan.
+- **Baru 10 unit test, belum ada UI test.** Syarat minimal 10 unit test + 3 UI test baru terpenuhi separuh. UI test menyusul di Sprint 4.
 
----
+## Screenshot
 
-## 📸 Tangkapan Layar
-
-Diambil dari Android Emulator (Pixel 7, API 37):
+Diambil dari Android Emulator (Pixel 7, API 37).
 
 <table>
   <tr>
-    <td align="center"><img src="docs/screenshots/01-beranda.png" width="230" alt="Beranda"><br><sub><b>Beranda</b> — daftar tawaran tebengan</sub></td>
-    <td align="center"><img src="docs/screenshots/02-detail.png" width="230" alt="Detail"><br><sub><b>Detail Tebengan</b> — rute, jadwal, kursi, ongkos</sub></td>
-    <td align="center"><img src="docs/screenshots/03-tambah.png" width="230" alt="Tawarkan Tebengan"><br><sub><b>Tawarkan Tebengan</b> — form tawaran baru</sub></td>
+    <td align="center"><img src="docs/screenshots/01-beranda.png" width="230" alt="Beranda"><br><sub>Beranda — daftar tawaran tebengan</sub></td>
+    <td align="center"><img src="docs/screenshots/02-detail.png" width="230" alt="Detail"><br><sub>Detail Tebengan</sub></td>
+    <td align="center"><img src="docs/screenshots/03-tambah.png" width="230" alt="Tambah"><br><sub>Tawarkan Tebengan</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="docs/screenshots/04-peta.png" width="230" alt="Peta"><br><sub><b>Tebengan Terdekat</b> — fitur tema <i>Lokasi</i></sub></td>
-    <td align="center"><img src="docs/screenshots/05-profil.png" width="230" alt="Profil"><br><sub><b>Profil</b> — data pengguna &amp; statistik</sub></td>
-    <td align="center"><img src="docs/screenshots/06-pengaturan.png" width="230" alt="Pengaturan"><br><sub><b>Pengaturan</b> — toggle mode gelap &amp; info aplikasi</sub></td>
+    <td align="center"><img src="docs/screenshots/04-peta.png" width="230" alt="Peta"><br><sub>Tebengan terdekat — fitur tema Lokasi</sub></td>
+    <td align="center"><img src="docs/screenshots/05-profil.png" width="230" alt="Profil"><br><sub>Profil</sub></td>
+    <td align="center"><img src="docs/screenshots/06-pengaturan.png" width="230" alt="Pengaturan"><br><sub>Pengaturan</sub></td>
   </tr>
 </table>
 
 <p align="center">
   <img src="docs/screenshots/07-beranda-gelap.png" width="230" alt="Mode gelap">
-  <br><sub><b>Mode Gelap</b> — bonus Dark Mode (+5%)</sub>
+  <br><sub>Mode gelap</sub>
 </p>
 
----
+## Fitur
 
-## ✨ Fitur
+**Wajib**
 
-### Fitur Minimum
+- [x] Beranda: daftar tawaran tebengan dalam `LazyColumn`
+- [x] Detail tebengan: rute, jadwal, kursi tersisa, ongkos, kontak pengemudi
+- [x] Tambah tebengan: form tawaran baru
+- [x] Peta: daftar tebengan terurut berdasarkan jarak
+- [x] Profil pengguna dan statistik sederhana
+- [x] Pengaturan: toggle mode gelap dan info aplikasi
+- [x] Navigasi multi-layar dengan argument passing
+- [x] MVVM + clean architecture
+- [x] State management dengan `StateFlow`
+- [x] Dependency injection dengan Koin
+- [ ] REST API (Ktor) — Sprint 3
+- [ ] Database lokal untuk CRUD permanen — Sprint 3
+- [ ] Minimal 10 unit test + 3 UI test — separuh, Sprint 4
 
-- [x] **Beranda** — daftar tawaran tebengan (LazyColumn, Material 3)
-- [x] **Detail** — detail tebengan dengan argument passing (`detail/{id}`)
-- [x] **Tambah Tebengan** — form pembuatan tawaran (bagian dari CRUD)
-- [x] **Peta** — sebaran titik jemput berbasis lokasi
-- [x] **Profil** — informasi pengguna
-- [x] **Pengaturan** — preferensi aplikasi (dark mode)
-- [x] Navigasi multi-layar + bottom navigation
-- [x] MVVM + Clean Architecture (presentation / domain / data)
-- [x] State management dengan `StateFlow` + sealed UI state
-- [x] Dependency Injection dengan **Koin**
-- [x] Unit test (`kotlin.test` + `kotlinx-coroutines-test`)
-- [ ] Local database dengan CRUD persisten (SQLDelight / DataStore) — *Sprint 3*
-- [ ] REST API integration dengan Ktor Client — *Sprint 3*
-- [ ] Minimal 10 unit test + 3 UI test, coverage > 50% — *Sprint 4*
-- [ ] Animasi & polish UI/UX — *Sprint 4*
+**Bonus**
 
-### Fitur Bonus
+- [x] CI/CD otomatis (+5%)
+- [x] Mode gelap (+5%)
+- [x] Target iOS: `iosX64`, `iosArm64`, `iosSimulatorArm64` (+10%)
+- [ ] Offline-first (+5%)
+- [ ] Signed APK/AAB (+5%)
+- [ ] Integrasi AI (+10%, opsional)
 
-- [x] **CI/CD** — GitHub Actions build + test otomatis (+5%)
-- [x] **Dark Mode** — toggle tema terang/gelap (+5%)
-- [x] **iOS Support** — target `iosX64`, `iosArm64`, `iosSimulatorArm64` (+10%)
-- [ ] **Offline First** — data tetap tersedia tanpa internet (+5%)
-- [ ] **Play Store Ready** — signed APK/AAB (+5%)
-- [ ] **AI Integration** — rekomendasi tebengan pintar (+10%, opsional)
+Target yang dipakai: Android (minSdk 24, compile/target SDK 36) dan iOS. Kami menambahkan target desktop JVM bukan karena diminta, tapi supaya unit test bisa dijalankan di CI Linux tanpa perlu emulator atau macOS.
 
----
+## Teknologi
 
-## 🛠 Tech Stack
-
-| Kategori | Teknologi |
+| Bagian | Yang dipakai |
 |---|---|
-| Framework | Kotlin Multiplatform 2.2.20, Compose Multiplatform 1.9.0 |
-| Arsitektur | MVVM + Clean Architecture + Repository Pattern |
-| Async & State | Coroutines 1.10.2, Flow, StateFlow |
-| Networking | Ktor Client 3.2.3, Kotlinx Serialization 1.9.0 |
+| Bahasa & framework | Kotlin 2.2.20, Compose Multiplatform 1.9.0 |
+| Build | Gradle 8.14.3 (Kotlin DSL + version catalog), AGP 8.11.2 |
+| Arsitektur | MVVM, clean architecture, repository pattern |
+| Async & state | Coroutines 1.10.2, Flow, StateFlow |
 | DI | Koin 4.1.1 |
 | Navigasi | JetBrains Navigation Compose 2.9.2 |
-| Lifecycle | JetBrains Lifecycle 2.9.6 (ViewModel, `collectAsStateWithLifecycle`) |
-| Testing | kotlin.test, kotlinx-coroutines-test |
-| Build | Gradle 8.14.3 (Kotlin DSL + Version Catalog), AGP 8.11.2 |
-| CI/CD | GitHub Actions (JDK 17, Android SDK) |
-| Target | Android (minSdk 24, target/compileSdk 36), iOS 3 arch, Desktop JVM |
+| Networking | Ktor 3.2.3 + Kotlinx Serialization 1.9.0 (belum dipakai) |
+| Testing | kotlin-test, kotlinx-coroutines-test |
+| CI | GitHub Actions |
 
----
+## Arsitektur
 
-## 🏗 Arsitektur
+Ada tiga layer, dan arah dependensinya selalu ke dalam: `presentation` → `domain` ← `data`.
 
-Proyek mengikuti **Clean Architecture** dengan aturan dependensi mengarah ke dalam: `presentation → domain ← data`.
+- **domain** — model (`Tebengan`, `TitikLokasi`), interface `TebenganRepository`, dan use case. Tidak Tahu apa pun soal UI atau sumber data, jadi bisa diuji tanpa Android sama sekali.
+- **data** — implementasi repository, sumber data lokal, DTO + mapper. Saat ini repository hanya membungkus penyimpanan in-memory.
+- **presentation** — ViewModel dan composable. ViewModel hanya mengeluarkan `StateFlow`, tidak menyentuh Compose.
 
-```
-┌─────────────────────────────────────────────┐
-│  PRESENTATION                               │
-│  Screens (Compose) · ViewModels · UI State  │
-│  navigation/ · theme/ · components/         │
-└───────────────────┬─────────────────────────┘
-                    │ depends on
-┌───────────────────▼─────────────────────────┐
-│  DOMAIN  (tanpa dependensi platform)        │
-│  Use Cases · Domain Models · Repo Interface │
-└───────────────────▲─────────────────────────┘
-                    │ implements
-┌───────────────────┴─────────────────────────┐
-│  DATA                                       │
-│  RepositoryImpl · Local/Remote DataSource   │
-│  DTO & Mapper                               │
-└─────────────────────────────────────────────┘
-```
+Struktur folder dan alasan tiap keputusan teknis ada di [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-Detail lengkap ada di **[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)**.
+## Menjalankan proyek
 
-### Struktur Proyek
+Butuh JDK 17, Android SDK Platform 36, dan Android Studio. Kalau mau menjalankan target iOS, harus di macOS dengan Xcode.
 
-```
-composeApp/src/
-├── commonMain/kotlin/id/ac/itera/tebengankekampus/
-│   ├── App.kt                      # Root composable
-│   ├── di/AppModule.kt             # Koin modules
-│   ├── data/
-│   │   ├── local/                  # TebenganLocalDataSource (seed data)
-│   │   ├── remote/                 # HttpClientFactory (expect)
-│   │   ├── repository/             # TebenganRepositoryImpl
-│   │   └── model/                  # TebenganDto + mapper
-│   ├── domain/
-│   │   ├── model/                  # Tebengan, Pengguna, TitikLokasi (Haversine)
-│   │   ├── repository/             # TebenganRepository (interface)
-│   │   └── usecase/                # AmatiDaftar, Ambil, Tambah, Hapus, CariTerdekat
-│   ├── presentation/
-│   │   ├── navigation/             # Routes, AppNavHost
-│   │   ├── theme/                  # Material 3 theme (light/dark)
-│   │   ├── components/             # TebenganCard, StateComponents
-│   │   └── screens/                # home, detail, tambah, peta, profil, pengaturan
-│   └── util/Platform.kt            # expect
-├── androidMain/                    # MainActivity, TebenganApplication, actual
-├── desktopMain/                    # main.kt (preview cepat & test), actual
-├── iosMain/                        # MainViewController, actual
-└── commonTest/                     # Unit test
-```
-
----
-
-## 🚀 Setup
-
-### Prasyarat
-- Android Studio (Ladybug atau lebih baru) + JDK 17
-- Android SDK Platform 36
-- (Opsional) Xcode 15+ untuk menjalankan target iOS (hanya di macOS)
-
-### Langkah
 ```bash
-# 1. Clone repositori
 git clone https://github.com/HaniaSyakira-jpg/Kel05-TebenganKeKampus.git
 cd Kel05-TebenganKeKampus
 
-# 2. Buka di Android Studio, lalu tunggu Gradle sync
-#    (atau jalankan lewat terminal:)
-
-# 3. Jalankan aplikasi Android (butuh emulator/device)
-./gradlew :composeApp:installDebug
-
-# 4. Menjalankan versi Desktop (tanpa emulator, untuk preview cepat)
-./gradlew :composeApp:run
-
-# 5. Menjalankan unit test
-./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest
-
-# 6. Build APK debug
-./gradlew :composeApp:assembleDebug
+./gradlew :composeApp:installDebug        # jalankan di emulator/device
+./gradlew :composeApp:run                 # versi desktop, buat cek cepat tanpa emulator
+./gradlew :composeApp:desktopTest :composeApp:testDebugUnitTest   # unit test
+./gradlew :composeApp:assembleDebug       # build APK debug
 ```
 
-Android Studio: pilih run configuration **composeApp** untuk Android, atau jalankan `:composeApp:run` untuk Desktop.
+File `local.properties` yang berisi path Android SDK tidak ikut di-commit; Android Studio akan membuatnya sendiri saat sync.
 
-> `local.properties` (berisi path Android SDK) tidak di-commit. Android Studio membuatnya otomatis saat sync.
+## CI
 
----
+`.github/workflows/ci.yml` jalan tiap push dan pull request ke `main` atau `develop`. Isinya:
 
-## 🔄 CI/CD
-
-Workflow [`.github/workflows/ci.yml`](.github/workflows/ci.yml) berjalan pada setiap `push` dan `pull_request` ke `main`/`develop`:
-
-1. Checkout + setup JDK 17 (Temurin, cache Gradle)
-2. Setup Android SDK
-3. `./gradlew :composeApp:testDebugUnitTest :composeApp:desktopTest` — menjalankan seluruh unit test
-4. `./gradlew :composeApp:assembleDebug` — memastikan APK dapat dibangun
+1. Checkout dan setup JDK 17
+2. Pasang paket Android SDK yang dibutuhkan (`platforms;android-36`, `build-tools;35.0.0`)
+3. Jalankan `:composeApp:testDebugUnitTest` dan `:composeApp:desktopTest`
+4. Build `:composeApp:assembleDebug`
 5. Upload laporan test sebagai artifact
 
-Status badge di bagian atas README akan menampilkan **passing** bila seluruh langkah berhasil.
+Langkah tesnya sengaja tidak memakai task `test` biasa karena itu akan ikut menjalankan task iOS, yang tidak mungkin jalan di runner Linux.
 
----
+## Alur kerja git
 
-## 🌿 Branching & Konvensi Commit
-
-Strategi branching: `main` ← `develop` ← `feature/*`
+`main` ← `develop` ← `feature/*`. Tidak ada yang push langsung ke `main`.
 
 ```bash
 git checkout develop
-git pull origin develop
 git checkout -b feature/nama-fitur
-# ...kerjakan fitur...
-git add . && git commit -m "feat: implement nama fitur"
+# kerjakan
+git commit -m "feat: tambah layar filter"
 git push origin feature/nama-fitur
-# Buka Pull Request di GitHub → minta review → merge
+# buka pull request, minta review, baru merge
 ```
 
-Konvensi commit: `feat:` · `fix:` · `refactor:` · `test:` · `docs:` · `style:` · `chore:`
+Format commit: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `style:`, `chore:`.
 
----
+## Rencana sprint
 
-## 📅 Rencana Sprint
-
-| Sprint | Minggu | Fokus |
+| Sprint | Minggu | Isi |
 |---|---|---|
-| **Sprint 1** | W11 | Planning & Setup — requirements, arsitektur, repo, CI/CD ✅ |
-| Sprint 2 | W12 | Core Features — layar utama, navigasi, data layer, CRUD |
-| Sprint 3 | W13 | Advanced Features — Ktor REST API, SQLDelight/offline-first, lokasi platform |
-| Sprint 4 | W14 | Polish & Testing — UI/UX, bug fix, ≥10 unit test + 3 UI test |
-| Sprint 5 | W15 | Final Preparation — perbaikan akhir, persiapan demo |
-| UAS | W16 | Final Demo Day |
+| 1 | 11 | Planning, arsitektur, repo, CI/CD — selesai |
+| 2 | 12 | Layar utama, navigasi, data layer, CRUD |
+| 3 | 13 | Ktor, SQLDelight, permission lokasi |
+| 4 | 14 | Polish UI, unit test + UI test |
+| 5 | 15 | Perbaikan akhir, persiapan demo |
 
-Rincian fitur per sprint dan **pembagian tugas** ada di **[docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md)**.
+Rincian fitur per sprint dan pembagian tugas tiap anggota ada di [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
 
----
+## Dokumentasi lain
 
-## 📚 Dokumentasi
-
-| Dokumen | Isi |
-|---|---|
-| [README.md](README.md) | Ikhtisar, tim, fitur, setup, CI/CD |
-| [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) | Requirements, fitur per sprint, task assignment, definisi selesai |
-| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | Clean Architecture, layer, DI, alur data, keputusan teknis |
+- [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md) — kebutuhan, rencana sprint, pembagian tugas
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — penjelasan arsitektur dan keputusan teknis
 
 ---
 
-## 📄 Lisensi & Atribusi
-
-Proyek akademik untuk mata kuliah IF25-22017 Pengembangan Aplikasi Mobile, Program Studi Teknik Informatika, Institut Teknologi Sumatera. Kode bersifat original kecuali disebutkan lain.
+Proyek akademik untuk IF25-22017 Pengembangan Aplikasi Mobile, Teknik Informatika, Institut Teknologi Sumatera.

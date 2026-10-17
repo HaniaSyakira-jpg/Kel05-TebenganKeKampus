@@ -1,166 +1,150 @@
-# Project Plan — Tebengan Ke Kampus
+# Rencana Proyek — Tebengan Ke Kampus
 
-**Kelompok 05 PAM RA** · Mata kuliah IF25-22017 Pengembangan Aplikasi Mobile · ITERA
-**Tema**: Tebengan Ke Kampus (berbagi tumpangan menuju kampus) · **Fitur tema**: Lokasi
+Kelompok 05 PAM RA · IF25-22017 Pengembangan Aplikasi Mobile · ITERA
 
-Dokumen ini memuat *requirements*, *feature breakdown per sprint*, dan *task assignment* sesuai deliverable Sprint 1.
+Dokumen ini isinya kebutuhan aplikasi, rencana tiap sprint, dan pembagian tugas anggota. Ini yang diminta sebagai salah satu deliverable Sprint 1.
 
----
+## 1. Latar belakang dan batasan
 
-## 1. Requirements
+Masalah yang mau diselesaikan: mahasiswa yang tinggal jauh dari kampus sering kesulitan dan mahal untuk sampai ke kampus, padahal banyak juga yang berangkat bawa kendaraan dengan kursi kosong. Aplikasi ini mencoba mempertemukan dua kelompok itu.
 
-### 1.1 Masalah & Solusi
+Penggunanya dua macam, dan kebutuhannya beda:
 
-| | |
-|---|---|
-| **Masalah** | Mahasiswa ITERA yang tinggal jauh dari kampus kesulitan dan mahal untuk sampai ke kampus; banyak kendaraan pribadi berangkat dengan kursi kosong. |
-| **Solusi** | Aplikasi yang mempertemukan penawar tebengan (punya kendaraan) dengan pencari tebengan, diurutkan berdasarkan **kedekatan titik jemput**. |
-| **Pengguna** | Mahasiswa ITERA (penumpang) dan mahasiswa ITERA yang membawa kendaraan (pengemudi/penawar). |
+- **Pencari tebengan** — mau lihat daftar tawaran yang relevan, terutama yang titik jemputnya dekat. Dia butuh daftar yang sudah terurut, bukan daftar acak.
+- **Penawar tebengan** — mau memasang tawaran dengan cepat. Kalau form-nya ribet, dia tidak akan pakai.
 
-### 1.2 Functional Requirements
+Batasan yang kami sadari sejak awal:
 
-| ID | Requirement | Prioritas |
+- Waktu pengerjaan cuma 5 minggu efektif (Sprint 1-5), sambil ada praktikum lain. Jadi fitur bonus hanya dikerjakan kalau fitur wajib sudah beres.
+- Tim 3 orang, jadi tidak realistis mengerjakan Ktor, SQLDelight, GPS asli, dan AI sekaligus di sprint yang sama.
+- Tidak ada backend sendiri. Kalau nanti butuh API, kami akan pakai layanan publik atau mock server; keputusan ini belum final.
+
+## 2. Kebutuhan fungsional
+
+| Kode | Kebutuhan | Prioritas |
 |---|---|---|
-| FR-01 | Pengguna dapat melihat daftar tawaran tebengan | Wajib |
-| FR-02 | Daftar tebengan terurut dari titik jemput terdekat ke lokasi pengguna | Wajib (tema) |
-| FR-03 | Pengguna dapat membuka detail tebengan (rute, jadwal, kursi, ongkos) | Wajib |
-| FR-04 | Pengguna dapat menambahkan tawaran tebengan baru | Wajib |
-| FR-05 | Pengguna dapat menghapus tawaran tebengan miliknya | Wajib |
-| FR-06 | Peta menampilkan sebaran titik jemput | Wajib |
-| FR-07 | Pengguna dapat melihat dan mengubah profil | Wajib |
-| FR-08 | Pengguna dapat mengubah preferensi aplikasi (dark mode) | Wajib |
-| FR-09 | Data tebengan tersimpan lokal dan tersedia tanpa internet | Bonus (offline-first) |
+| FR-01 | Lihat daftar tawaran tebengan | Wajib |
+| FR-02 | Daftar terurut dari titik jemput terdekat ke lokasi pengguna | Wajib (tema) |
+| FR-03 | Buka detail tebengan: rute, jadwal, kursi, ongkos, kontak | Wajib |
+| FR-04 | Tambah tawaran tebengan baru | Wajib |
+| FR-05 | Hapus tawaran milik sendiri | Wajib |
+| FR-06 | Peta sebaran titik jemput | Wajib |
+| FR-07 | Lihat dan ubah profil | Wajib |
+| FR-08 | Ubah preferensi aplikasi (mode gelap) | Wajib |
+| FR-09 | Data tetap ada tanpa internet | Bonus |
 
-### 1.3 Non-Functional Requirements
+FR-02 adalah inti tema kelompok kami. Implementasinya sekarang ada di `CariTebenganTerdekatUseCase`, yang mengurutkan daftar berdasarkan hasil `TitikLokasi.jarakKmKe()` (rumus Haversine). Logika ini ditaruh di layer domain supaya bisa diuji murni tanpa perlu GPS atau perangkat.
 
-| ID | Requirement |
-|---|---|
-| NFR-01 | Minimal 5 layar, layout responsif, Material Design 3 |
-| NFR-02 | MVVM + Clean Architecture (lapisan presentation / domain / data) |
-| NFR-03 | State management dengan `StateFlow` dan sealed UI state |
-| NFR-04 | Navigasi multi-layar dengan argument passing |
-| NFR-05 | Dependency Injection dengan Koin |
-| NFR-06 | Minimal 10 unit test, 3 UI test, coverage > 50% |
-| NFR-07 | Berjalan di Android (wajib) dan iOS (bonus) dari satu codebase |
-| NFR-08 | CI otomatis (build + test) hijau pada setiap push/PR |
+## 3. Kebutuhan non-fungsional
 
----
+- Minimal 5 layar, layout responsif, Material Design 3
+- MVVM dengan pemisahan layer presentation / domain / data
+- State pakai `StateFlow` + sealed UI state
+- Navigasi multi-layar dengan argument passing
+- Dependency injection pakai Koin
+- Minimal 10 unit test dan 3 UI test, coverage di atas 50%
+- Jalan di Android (wajib) dan iOS (bonus)
+- CI otomatis: build dan test hijau tiap push
 
-## 2. Fitur per Sprint
+## 4. Rencana per sprint
 
-### Sprint 1 — Planning & Setup (Minggu 11) ✅
+### Sprint 1 — Planning dan setup (minggu 11) — selesai
 
-Fokus: fondasi proyek, bukan fitur produk.
+Sprint ini tidak menghasilkan fitur produk, isinya fondasi:
 
-| Deliverable | Status |
-|---|---|
-| Repositori GitHub dengan seluruh anggota sebagai collaborator | ✅ |
-| Struktur proyek KMP dengan folder arsitektur yang benar | ✅ |
-| GitHub Actions CI (build + test) berjalan | ✅ |
-| README lengkap (tim, deskripsi, fitur, tech stack, arsitektur) | ✅ |
-| Dokumen project plan (fitur per sprint + task assignment) | ✅ |
-| **Bonus**: setup Koin DI (+10%) | ✅ |
+- Repo GitHub dengan anggota sebagai collaborator
+- Struktur proyek KMP dengan folder per layer
+- CI GitHub Actions (build + test)
+- README dan dokumen rencana proyek
+- Bonus: setup Koin DI
 
-### Sprint 2 — Core Features (Minggu 12)
+### Sprint 2 — Core features (minggu 12)
 
-| Fitur | Terkait |
-|---|---|
-| Layar **Beranda** menampilkan daftar tebengan (LazyColumn) | FR-01 |
-| Layar **Detail** + argument passing `detail/{id}` | FR-03 |
-| Layar **Tambah Tebengan** (form + validasi) | FR-04 |
-| Layar **Profil** dan bottom navigation | FR-07 |
-| Data layer: repository, data source, model/mapper | NFR-02 |
-| CRUD dasar (Create, Read, Delete) pada penyimpanan lokal | FR-04, FR-05 |
-| Navigasi antar layar lengkap | NFR-04 |
+- Beranda menampilkan daftar tebengan
+- Detail tebengan + passing data lewat route
+- Form tambah tawaran
+- Profil dan bottom navigation
+- Repository, data source, model + mapper
+- CRUD dasar (create, read, delete)
 
-### Sprint 3 — Advanced Features (Minggu 13)
+### Sprint 3 — Advanced features (minggu 13)
 
-| Fitur | Terkait |
-|---|---|
-| Integrasi **Ktor Client** + Kotlinx Serialization (REST API) | NFR-07 |
-| Penyimpanan persisten **SQLDelight** + arsitektur offline-first | FR-09 |
-| **Pencarian tebengan terdekat** berbasis lokasi nyata (permission + GPS) | FR-02 |
-| Layar **Peta** menampilkan titik jemput penawaran | FR-06 |
-| Filter/urutkan daftar berdasarkan jarak, waktu, ongkos | FR-02 |
+- Integrasi Ktor + Kotlinx Serialization untuk REST API
+- Ganti penyimpanan in-memory jadi SQLDelight
+- Ambil lokasi asli dari GPS, termasuk permission-nya
+- Peta yang benar-benar menampilkan titik jemput
+- Filter dan urutan berdasarkan jarak, waktu, atau ongkos
 
-### Sprint 4 — Polish & Testing (Minggu 14)
+### Sprint 4 — Polish dan testing (minggu 14)
 
-| Fitur | Terkait |
-|---|---|
-| Penyempurnaan UI/UX + animasi transisi | NFR-01 |
-| **Dark mode** penuh (theme terang/gelap) | FR-08 |
-| Minimal **10 unit test** + **3 UI test**, coverage > 50% | NFR-06 |
-| Penanganan error & empty state yang rapi | NFR-01 |
-| Perbaikan bug hasil review | — |
+- Rapikan UI, tambah animasi transisi
+- Mode gelap lengkap
+- Lengkapi sampai minimal 10 unit test + 3 UI test
+- Empty state dan error state yang layak
+- Perbaikan bug hasil review
 
-### Sprint 5 — Final Preparation (Minggu 15)
+Sprint 3-4 ini yang paling padat. Kami sadar risikonya paling besar di situ karena Ktor dan SQLDelight belum pernah kami pakai di proyek sebelumnya; kalau waktunya mepet, yang kami tunda dulu adalah filter dan animasi, bukan penyimpanan data.
 
-| Fitur | Terkait |
-|---|---|
-| Perbaikan akhir & stabilisasi | — |
-| Signed APK/AAB (Play Store ready) | Bonus |
-| Penyempurnaan dokumentasi & panduan demo | — |
-| Latihan presentasi + demo | — |
+### Sprint 5 — Persiapan akhir (minggu 15)
 
-### UAS — Final Demo Day (Minggu 16)
+- Perbaikan akhir dan stabilisasi
+- Signed APK/AAB
+- Rapikan dokumentasi dan siapkan bahan demo
 
-Demo aplikasi, live code review, dan tanya jawab.
+## 5. Pembagian tugas
 
----
+Peran mengikuti saran di materi: lead, developer, QA. Semua anggota tetap menulis kode, bukan hanya satu orang.
 
-## 3. Task Assignment
-
-Pembagian peran mengikuti rekomendasi Sprint 1 (Lead, Dev, QA). Setiap anggota berkontribusi **commit** sebagai bukti kolaborasi (rubrik Team Collaboration 10%).
-
-| Anggota | Role | Tanggung jawab utama |
+| Anggota | Peran | Tanggung jawab |
 |---|---|---|
-| **Refin Agus Saputra** (124140126) | Lead / Product & Integration | Menjaga scope & requirements, integrasi antar fitur, koordinasi PR & review, penyusunan materi demo/presentasi |
-| **Hania Syakira** (124140114) | Dev — UI/UX & Screens | Desain & implementasi layar Compose (Beranda, Detail, Tambah, Peta, Profil, Pengaturan), theme, komponen reusable, animasi |
-| **Yowen Daniel** (124140120) | Dev — Architecture, Data & CI/CD | Struktur Clean Architecture, domain & data layer, use case, Koin DI, Ktor & penyimpanan lokal, unit test, pipeline CI/CD |
+| Refin Agus Saputra | Ketua | Menjaga scope dan kebutuhan, integrasi antar fitur, review pull request, bahan presentasi |
+| Hania Syakira | Developer UI/UX | Layar Compose, komponen yang dipakai berulang, theme, animasi |
+| Yowen Daniel | Developer arsitektur/data | Struktur layer, domain dan data, Koin, Ktor dan penyimpanan lokal, unit test, CI/CD |
 
-### 3.1 Pembagian Tugas per Sprint
+Pembagian per sprint:
 
-| Sprint | Refin (Lead) | Hania (UI/UX) | Yowen (Arch/Data/CI) |
+| Sprint | Refin | Hania | Yowen |
 |---|---|---|---|
-| **Sprint 1** | Requirements, pemilihan ide, dokumentasi plan, integrasi repo | Struktur presentasi layar, kontribusi README (bagian fitur) | Struktur proyek KMP, layer domain/data, DI Koin, CI/CD, unit test |
-| **Sprint 2** | Review PR, verifikasi alur CRUD, integrasi navigasi | Beranda, Detail, Tambah, Profil, komponen & theme | Repository, data source, mapper, use case, ViewModel |
-| **Sprint 3** | Review & integrasi API, QA manual | Layar Peta, UI filter/pencarian, empty/error state | Ktor Client, SQLDelight, permission lokasi, logic Haversine |
-| **Sprint 4** | UAT, tracking bug, verifikasi coverage | Polish UI/UX, animasi, dark mode | Unit test & UI test, perbaikan bug data layer |
-| **Sprint 5** | Materi demo, presentasi, sign-off | Final UI pass, screenshot & aset demo | Signed build, perbaikan akhir, dokumentasi teknis |
+| 1 | Kebutuhan, pilih ide, dokumen rencana | Rancangan tampilan, bagian fitur di README | Struktur proyek, layer domain/data, Koin, CI, unit test |
+| 2 | Review PR, cek alur CRUD | Beranda, Detail, Tambah, Profil, komponen | Repository, data source, mapper, use case, ViewModel |
+| 3 | Review integrasi API, QA manual | Layar Peta, filter, empty/error state | Ktor, SQLDelight, permission lokasi, Haversine |
+| 4 | UAT, catat bug, cek coverage | Polish UI, animasi, mode gelap | Unit test, UI test, perbaikan bug data layer |
+| 5 | Materi demo dan presentasi | Final pass UI, aset demo | Signed build, dokumentasi teknis |
 
-### 3.2 Definition of Done
+## 6. Definisi selesai
 
-Sebuah task dianggap selesai bila:
-1. Kode dikompilasi tanpa error dan lolos `./gradlew :composeApp:testDebugUnitTest :composeApp:desktopTest`.
-2. Ada unit test untuk logika non-UI (domain/data).
-3. Sudah melalui Pull Request dan di-review minimal satu anggota lain.
-4. CI GitHub Actions berstatus **passing**.
-5. Dokumentasi (README/komentar) diperbarui bila mengubah perilaku.
+Sebuah task dianggap selesai kalau:
 
----
+1. Kodenya bisa dikompilasi dan `./gradlew :composeApp:testDebugUnitTest :composeApp:desktopTest` lulus
+2. Ada unit test untuk logika non-UI
+3. Sudah lewat pull request dan di-review minimal satu anggota lain
+4. CI hijau
+5. Dokumentasi diperbarui kalau perilakunya berubah
 
-## 4. Alur Kerja Git
+## 7. Alur kerja git
 
 ```
-main        ← kode production-ready, dilindungi, hanya lewat PR
-  ↑ merge
-develop     ← integrasi, tujuan default PR harian
-  ↑ merge
-feature/*   ← feature/beranda-screen, feature/ktor-api, dst.
+main        kode siap pakai, tidak boleh push langsung
+  ↑
+develop     integrasi harian
+  ↑
+feature/*   satu branch per fitur
 ```
 
-- Commit mengikuti konvensi: `feat:` · `fix:` · `refactor:` · `test:` · `docs:` · `style:` · `chore:`
-- Satu Pull Request = satu fitur/perbaikan yang fokus.
-- Template PR memuat deskripsi, daftar perubahan, checklist (compile, test, no warnings).
+Commit pakai format `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `style:`, `chore:`. Satu pull request untuk satu fitur supaya review-nya tidak melebar.
 
----
+## 8. Risiko dan catatan
 
-## 5. Risiko & Mitigasi
-
-| Risiko | Mitigasi |
+| Risiko | Cara menanganinya |
 |---|---|
-| Scope creep (terlalu banyak bonus) | Kerjakan fitur wajib dulu; bonus hanya bila waktu tersisa |
-| Target iOS butuh macOS/Xcode | Siapkan target iOS lebih awal; uji di mesin macOS bila tersedia |
-| Data lokasi palsu saat dev | Gunakan titik lokasi seed (koordinat ITERA) sampai GPS asli terpasang |
-| Kontribusi tidak merata | Task assignment jelas + review PR wajib + cek riwayat commit |
-| CI merah memblokir PR | Jalankan test lokal sebelum push; perbaiki CI segera |
+| Fitur bonus kebanyakan | Kerjakan yang wajib dulu, bonus hanya kalau ada sisa waktu |
+| Ktor dan SQLDelight belum pernah dipakai | Latihan di luar jam praktikum sebelum Sprint 3 mulai |
+| Target iOS perlu macOS | Siapkan targetnya lebih awal, uji jalan kalau ada akses Mac |
+| Kontribusi tidak merata | Tugas per sprint jelas + review PR wajib |
+| CI merah menghambat PR | Jalankan test lokal dulu sebelum push |
+
+Catatan yang sudah kami temukan sendiri saat Sprint 1:
+
+- Form Tambah Tebengan punya nilai awal (default) di beberapa field tapi tidak di "Titik jemput", jadi tampilannya terlihat tidak konsisten. Sudah dicatat untuk dirapikan di Sprint 2.
+- Beberapa dependency Ktor sudah masuk build config tapi belum dipakai. Ini disengaja, tapi tetap utang teknis yang perlu dibereskan di Sprint 3.
+- Data masih in-memory, jadi tawaran baru hilang kalau aplikasi ditutup. Perlu diperjelas di demo supaya tidak disangka bug.
