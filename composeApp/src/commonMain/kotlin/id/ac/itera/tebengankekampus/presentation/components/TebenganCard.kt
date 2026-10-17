@@ -1,0 +1,48 @@
+package id.ac.itera.tebengankekampus.presentation.components
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import id.ac.itera.tebengankekampus.domain.model.Tebengan
+
+@Composable
+fun TebenganCard(
+    tebengan: Tebengan,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick),
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Text(
+                text = "${tebengan.asal.nama}  →  ${tebengan.tujuan.nama}",
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(Modifier.height(6.dp))
+            Text(
+                text = "Pengemudi: ${tebengan.namaPengemudi}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = "Jadwal: ${tebengan.jadwal}",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+            Text(
+                text = "Kursi tersedia: ${tebengan.kursiTersedia}  •  Rp${tebengan.hargaPerOrang}/orang",
+                style = MaterialTheme.typography.bodySmall,
+            )
+        }
+    }
+}
