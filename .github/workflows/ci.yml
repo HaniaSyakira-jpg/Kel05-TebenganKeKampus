@@ -30,12 +30,22 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      # Runner ubuntu-latest sudah menyertakan Android SDK (ANDROID_SDK_ROOT).
-      # Kita cukup memastikan paket yang dibutuhkan proyek terpasang.
+      # Runner ubuntu-latest sudah menyertakan Android SDK, tetapi sdkmanager
+      # tidak selalu ada di PATH. Kita cari lokasinya secara dinamis dan
+      # pastikan paket yang dibutuhkan proyek terpasang.
       - name: Install required Android SDK packages
         run: |
-          yes | sdkmanager --licenses > /dev/null 2>&1 || true
-          sdkmanager "platform-tools" "platforms;android-36" "build-tools;35.0.0"
+          SDK_ROOT="${ANDROID_SDK_ROOT:-${ANDROID_HOME:-/usr/local/lib/android/sdk}}"
+          echo "ANDROID_SDK_ROOT=$SDK_ROOT" >> "$GITHUB_ENV"
+          echo "ANDROID_HOME=$SDK_ROOT" >> "$GITHUB_ENV"
+          SDKMANAGER="$(find "$SDK_ROOT/cmdline-tools" -maxdepth 3 -name sdkmanager -type f 2>/dev/null | head -1)"
+          if [ -n "$SDKMANAGER" ]; then
+            echo "Using sdkmanager: $SDKMANAGER"
+            yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
+            "$SDKMANAGER" "platform-tools" "platforms;android-36" "build-tools;35.0.0"
+          else
+            echo "sdkmanager tidak ditemukan; mengandalkan auto-download AGP."
+          fi
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
