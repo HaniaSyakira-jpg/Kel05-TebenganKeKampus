@@ -35,6 +35,30 @@ Alur utama:
 
 ---
 
+## 📸 Tangkapan Layar
+
+Diambil dari Android Emulator (Pixel 7, API 37):
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/01-beranda.png" width="230" alt="Beranda"><br><sub><b>Beranda</b> — daftar tawaran tebengan</sub></td>
+    <td align="center"><img src="docs/screenshots/02-detail.png" width="230" alt="Detail"><br><sub><b>Detail Tebengan</b> — rute, jadwal, kursi, ongkos</sub></td>
+    <td align="center"><img src="docs/screenshots/03-tambah.png" width="230" alt="Tawarkan Tebengan"><br><sub><b>Tawarkan Tebengan</b> — form tawaran baru</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/04-peta.png" width="230" alt="Peta"><br><sub><b>Tebengan Terdekat</b> — fitur tema <i>Lokasi</i></sub></td>
+    <td align="center"><img src="docs/screenshots/05-profil.png" width="230" alt="Profil"><br><sub><b>Profil</b> — data pengguna &amp; statistik</sub></td>
+    <td align="center"><img src="docs/screenshots/06-pengaturan.png" width="230" alt="Pengaturan"><br><sub><b>Pengaturan</b> — toggle mode gelap &amp; info aplikasi</sub></td>
+  </tr>
+</table>
+
+<p align="center">
+  <img src="docs/screenshots/07-beranda-gelap.png" width="230" alt="Mode gelap">
+  <br><sub><b>Mode Gelap</b> — bonus Dark Mode (+5%)</sub>
+</p>
+
+---
+
 ## ✨ Fitur
 
 ### Fitur Minimum
