@@ -15,7 +15,7 @@ Penggunanya dua macam, dan kebutuhannya beda:
 
 Batasan yang kami sadari sejak awal:
 
-- Waktu pengerjaan cuma 5 minggu efektif (Sprint 1-5), sambil ada praktikum lain. Jadi fitur bonus hanya dikerjakan kalau fitur wajib sudah beres.
+- Waktu pengerjaan cuma 5 sprint (Sprint 1-5), sambil ada praktikum lain. Jadi fitur bonus hanya dikerjakan kalau fitur wajib sudah beres.
 - Tim 3 orang, jadi tidak realistis mengerjakan Ktor, SQLDelight, GPS asli, dan AI sekaligus di sprint yang sama.
 - Tidak ada backend sendiri. Kalau nanti butuh API, kami akan pakai layanan publik atau mock server; keputusan ini belum final.
 
@@ -48,7 +48,7 @@ FR-02 adalah inti tema kelompok kami. Implementasinya sekarang ada di `CariTeben
 
 ## 4. Rencana per sprint
 
-### Sprint 1 — Planning dan setup (minggu 11) — selesai
+### Sprint 1 — Planning dan setup — selesai
 
 Sprint ini tidak menghasilkan fitur produk, isinya fondasi:
 
@@ -58,7 +58,7 @@ Sprint ini tidak menghasilkan fitur produk, isinya fondasi:
 - README dan dokumen rencana proyek
 - Bonus: setup Koin DI
 
-### Sprint 2 — Core features (minggu 12)
+### Sprint 2 — Core features
 
 - Beranda menampilkan daftar tebengan
 - Detail tebengan + passing data lewat route
@@ -67,7 +67,7 @@ Sprint ini tidak menghasilkan fitur produk, isinya fondasi:
 - Repository, data source, model + mapper
 - CRUD dasar (create, read, delete)
 
-### Sprint 3 — Advanced features (minggu 13)
+### Sprint 3 — Advanced features
 
 - Integrasi Ktor + Kotlinx Serialization untuk REST API
 - Ganti penyimpanan in-memory jadi SQLDelight
@@ -75,7 +75,7 @@ Sprint ini tidak menghasilkan fitur produk, isinya fondasi:
 - Peta yang benar-benar menampilkan titik jemput
 - Filter dan urutan berdasarkan jarak, waktu, atau ongkos
 
-### Sprint 4 — Polish dan testing (minggu 14)
+### Sprint 4 — Polish dan testing
 
 - Rapikan UI, tambah animasi transisi
 - Mode gelap lengkap
@@ -85,7 +85,7 @@ Sprint ini tidak menghasilkan fitur produk, isinya fondasi:
 
 Sprint 3-4 ini yang paling padat. Kami sadar risikonya paling besar di situ karena Ktor dan SQLDelight belum pernah kami pakai di proyek sebelumnya; kalau waktunya mepet, yang kami tunda dulu adalah filter dan animasi, bukan penyimpanan data.
 
-### Sprint 5 — Persiapan akhir (minggu 15)
+### Sprint 5 — Persiapan akhir
 
 - Perbaikan akhir dan stabilisasi
 - Signed APK/AAB

@@ -16,7 +16,7 @@ Latar belakangnya sederhana. Banyak mahasiswa berangkat ke kampus dengan kursi k
 
 ## Status pengerjaan
 
-Sprint 1 (minggu ke-11) sudah selesai. Yang saat ini sudah jalan:
+Sprint 1 (Planning & Setup) sudah selesai. Yang saat ini sudah jalan:
 
 - Struktur proyek KMP dengan pemisahan layer presentation / domain / data
 - 6 layar Compose: Beranda, Detail, Tambah, Peta, Profil, Pengaturan
@@ -153,13 +153,13 @@ Format commit: `feat:`, `fix:`, `refactor:`, `test:`, `docs:`, `style:`, `chore:
 
 ## Rencana sprint
 
-| Sprint | Minggu | Isi |
-|---|---|---|
-| 1 | 11 | Planning, arsitektur, repo, CI/CD — selesai |
-| 2 | 12 | Layar utama, navigasi, data layer, CRUD |
-| 3 | 13 | Ktor, SQLDelight, permission lokasi |
-| 4 | 14 | Polish UI, unit test + UI test |
-| 5 | 15 | Perbaikan akhir, persiapan demo |
+| Sprint | Isi |
+|---|---|
+| 1 | Planning, arsitektur, repo, CI/CD — selesai |
+| 2 | Layar utama, navigasi, data layer, CRUD |
+| 3 | Ktor, SQLDelight, permission lokasi |
+| 4 | Polish UI, unit test + UI test |
+| 5 | Perbaikan akhir, persiapan demo |
 
 Rincian fitur per sprint dan pembagian tugas tiap anggota ada di [docs/PROJECT_PLAN.md](docs/PROJECT_PLAN.md).
 
