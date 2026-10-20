@@ -131,3 +131,29 @@ compose.desktop {
         }
     }
 }
+
+// --- Checkpoint Minggu 2 ---
+
+// Supaya println() dari unit test tampil di konsol Gradle.
+tasks.withType<Test>().configureEach {
+    testLogging {
+        showStandardStreams = true
+        events("passed", "failed", "skipped")
+    }
+}
+
+// Menjalankan DemoStatusMain (bukti berjalan checkpoint) di konsol,
+// tanpa membuka jendela Compose.
+val desktopTarget = kotlin.targets.getByName("desktop")
+val desktopCompilation = desktopTarget.compilations.getByName("main")
+
+tasks.register<JavaExec>("runDemoStatus") {
+    group = "application"
+    description = "Menjalankan demo alur status pencarian tebengan (Checkpoint Minggu 2)."
+    mainClass.set("id.ac.itera.tebengankekampus.DemoStatusMainKt")
+    classpath = files(
+        desktopCompilation.output.allOutputs,
+        desktopCompilation.runtimeDependencyFiles,
+    )
+    dependsOn(desktopCompilation.compileTaskProvider)
+}

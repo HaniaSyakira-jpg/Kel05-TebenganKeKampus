@@ -21,12 +21,12 @@ Ini kelihatan seperti menambah kerumitan untuk aplikasi yang masih kecil. Alasan
 composeApp/src/
 ├── commonMain/kotlin/id/ac/itera/tebengankekampus/
 │   ├── data/
-│   │   ├── local/            penyimpanan in-memory (nanti diganti SQLDelight)
+│   │   ├── local/            penyimpanan in-memory + sumber data palsu (checkpoint 2)
 │   │   ├── mapper/           ubah DTO ⇄ model domain
 │   │   ├── remote/           placeholder untuk Ktor, belum dipakai
 │   │   └── repository/       implementasi TebenganRepository
 │   ├── domain/
-│   │   ├── model/            Tebengan, TitikLokasi
+│   │   ├── model/            Tebengan, TitikLokasi, PencarianLokasi, StatusPencarian
 │   │   ├── repository/       interface TebenganRepository
 │   │   └── usecase/          CariTebenganTerdekatUseCase, dll
 │   ├── presentation/
@@ -40,7 +40,7 @@ composeApp/src/
 ├── commonTest/               unit test
 ├── androidMain/              MainActivity, Platform.android.kt, manifest
 ├── iosMain/                  MainViewController, Platform.ios.kt
-└── desktopMain/              main.kt untuk jendela desktop
+└── desktopMain/              main.kt untuk jendela desktop, DemoStatusMain untuk konsol
 ```
 
 ## 3. Isi tiap layer
@@ -60,6 +60,8 @@ Bagian paling sederhana sekaligus paling penting, karena di sini aturan mainnya 
 ### data
 
 `TebenganRepositoryImpl` mengimplementasikan interface di atas. Sekarang dia hanya membungkus `TebenganLocalDataSource`, yang menyimpan daftar di sebuah `MutableStateFlow` berisi data awal (seed) di memori.
+
+`FakeTebenganDataSource` (Checkpoint Minggu 2) adalah sumber data palsu terpisah yang tidak dipakai aplikasi. Ia mengeluarkan status pencarian dan perubahan status tebengan lewat `Flow` dengan `delay`, untuk menunjukkan alur data yang sama seperti nantinya saat REST API masuk, sekaligus jadi bukti berjalan di konsol.
 
 `TebenganMapper` mengubah `TebenganDto` ke model domain. Sebenarnya sekarang belum ada API, tapi DTO dan mapper tetap dibuat supaya saat Ktor masuk nanti tidak perlu mengubah bentuk data yang beredar di layer lain.
 
@@ -121,8 +123,9 @@ Unit test ada di `commonTest` supaya jalan di semua target tanpa duplikasi. Yang
 | `CariTebenganTerdekatUseCaseTest` | Hasil urutan sesuai jarak | 1 |
 | `TebenganRepositoryImplTest` | Ambil semua, ambil per id (ada dan tidak ada), tambah, hapus | 4 |
 | `TebenganMapperTest` | Perubahan DTO ke model domain | 3 |
+| `FakeTebenganDataSourceTest` | Alur status pencarian, pengurutan jarak, perubahan status tebengan | 4 |
 
-Total 10 test case. Semuanya berjalan tanpa emulator atau perangkat.
+Total 14 test case. Semuanya berjalan tanpa emulator atau perangkat.
 
 Target desktop ditambahkan khusus untuk ini. Tujuannya supaya `:composeApp:desktopTest` bisa jalan cepat di komputer anggota tim dan di runner Linux, tanpa menunggu emulator menyala. Di CI, kami memakai kombinasi `testDebugUnitTest` dan `desktopTest`, dan tidak memakai task `test` biasa karena task itu akan ikut menarik task iOS yang tidak mungkin jalan di Linux.
 

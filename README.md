@@ -23,7 +23,7 @@ Sprint 1 (Planning & Setup) sudah selesai. Yang saat ini sudah jalan:
 - Navigasi antar layar + bottom navigation, termasuk passing data lewat route `detail/{id}`
 - State management pakai `StateFlow` dan sealed interface untuk UI state
 - Dependency injection pakai Koin
-- 10 unit test (4 file) untuk perhitungan jarak, use case, repository, dan mapper
+- 14 unit test (5 file) untuk perhitungan jarak, use case, repository, mapper, dan sumber data palsu
 - CI GitHub Actions: build + test otomatis tiap push/PR
 
 Yang belum selesai, sesuai rencana sprint berikutnya:
@@ -31,7 +31,59 @@ Yang belum selesai, sesuai rencana sprint berikutnya:
 - **Ktor belum dipakai.** Dependency-nya sudah dimasukkan ke build config sejak Sprint 1, tapi belum ada kode yang memanggilnya. Kami sengaja menaruhnya sekarang supaya Sprint 3 tidak perlu ubah konfigurasi build lagi — risikonya, ada dependency yang menganggur selama dua sprint.
 - **Data masih disimpan di memori.** Kalau aplikasi ditutup, tebengan yang baru ditambahkan akan hilang. Ini bukan bug, tapi memang belum dikerjakan; penyimpanan permanen (SQLDelight) masuk Sprint 3.
 - **Peta belum pakai GPS.** Koordinat lokasi pengguna masih di-hardcode di `PetaViewModel`, dan penanda peta masih berupa kotak placeholder, belum peta sungguhan.
-- **Baru 10 unit test, belum ada UI test.** Syarat minimal 10 unit test + 3 UI test baru terpenuhi separuh. UI test menyusul di Sprint 4.
+- **Baru 14 unit test, belum ada UI test.** Syarat minimal 10 unit test + 3 UI test baru terpenuhi separuh. UI test menyusul di Sprint 4.
+
+## Checkpoint Minggu 2
+
+Empat hal di bawah dikerjakan untuk checkpoint kedua. Semua kode baru ada di `commonMain` dan `commonTest`, jadi jalan di semua target (Android, iOS, desktop) tanpa duplikasi.
+
+1. **Model data tema** — dua data class dan satu sealed class status di `commonMain/.../domain/model/`:
+   - `PencarianLokasi` — titik jemput pengguna + radius maksimum pencarian (km).
+   - `TebenganTerdekat` — satu tebengan hasil pencarian beserta jaraknya (km).
+   - `StatusPencarian` (sealed class) — `Menunggu`, `Memuat`, `Sukses`, `Gagal`.
+2. **Sumber data palsu** — `data/local/FakeTebenganDataSource.kt`:
+   - `amatanPencarian()` mengeluarkan `Flow<StatusPencarian>` dengan `delay` (simulasi jaringan): `Menunggu` → `Memuat` → `Sukses`/`Gagal`.
+   - `amatanPerubahanStatus()` mengeluarkan `Flow<Tebengan>` yang statusnya berubah `TERBUKA` → `PENUH` → `SELESAI`.
+3. **Bukti berjalan** — test `FakeTebenganDataSourceTest` (mencetak status ke konsol) dan `desktopMain/.../DemoStatusMain.kt` (`fun main()`).
+4. **Dokumentasi** — README ini.
+
+Menjalankan bukti berjalan:
+
+```bash
+./gradlew :composeApp:runDemoStatus   # demo di konsol, tanpa membuka jendela
+./gradlew :composeApp:desktopTest     # unit test + output konsol
+```
+
+### Contoh keluaran konsol
+
+Hasil `runDemoStatus`:
+
+```
+=== Demo 1: alur status pencarian (delay + Flow) ===
+[status] Menunggu...
+[status] Memuat data...
+[status] Sukses, 4 tebengan terdekat:
+   1. TBN-002 - Hania Syakira (Asrama ITERA) - 0.00 km
+   2. TBN-001 - Refin Agus Saputra (Gerbang ITERA) - 0.24 km
+   3. TBN-003 - Yowen Daniel (Pasar Sukarame) - 2.54 km
+   4. TBN-004 - Refin Agus Saputra (Terminal Rajabasa) - 9.28 km
+
+=== Demo 2: Flow perubahan status tebengan ===
+[status] TBN-001 Refin Agus Saputra -> TERBUKA
+[status] TBN-001 Refin Agus Saputra -> PENUH
+[status] TBN-001 Refin Agus Saputra -> SELESAI
+```
+
+### Pembagian tugas
+
+_Isi nama anggota yang mengerjakan tiap bagian._
+
+| Bagian | Dikerjakan oleh |
+|---|---|
+| Model data tema (`PencarianLokasi`, `TebenganTerdekat`, `StatusPencarian`) | _..._ |
+| Sumber data palsu (`FakeTebenganDataSource`) | _..._ |
+| Bukti berjalan (test + `DemoStatusMain`) | _..._ |
+| Dokumentasi README | _..._ |
 
 ## Screenshot
 
